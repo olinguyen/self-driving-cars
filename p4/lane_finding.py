@@ -2,7 +2,11 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
+from calibrate_camera import *
+from thresholding import *
 
+calibrate_folder = "./camera_cal"
+imgpoints, objpoints = calibrate_pts(calibrate_folder)
 
 # Class to receive the characteristics of each line detection
 class Line():
@@ -61,8 +65,12 @@ class LaneDetector():
         self.right_line = Line()
         self.center = 0
     
-    def pipeline():
-        pass
+    def pipeline(self, img):
+        undistorted = undistort(img, imgpoints, objpoints)
+
+        binary_output = combine_thresh(undistorted)
+
+        return binary_output
 
 
 def detect_lines(img, left_line, right_line):
