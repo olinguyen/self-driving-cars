@@ -1,3 +1,7 @@
+project_video.mp4
+test_video.mp4
+*.zip
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
