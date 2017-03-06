@@ -1,9 +1,6 @@
+## Project 2: Build a Traffic Sign Recognition Classifier
 
-# Self-Driving Car Engineer Nanodegree
-
-## Deep Learning
-
-## Project: Build a Traffic Sign Recognition Classifier
+In this project, the objective is to use a deep learning model to classify traffic signs from the [German Traffic Sign Dataset](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset) using Tensorflow.
 
 ---
 
@@ -30,7 +27,7 @@ with open(training_file, mode='rb') as f:
     train = pickle.load(f)
 with open(testing_file, mode='rb') as f:
     test = pickle.load(f)
-    
+
 X_train, y_train = train['features'], train['labels']
 X_test, y_test = test['features'], test['labels']
 ```
@@ -112,7 +109,7 @@ def rgb_to_grayscale(images, flatten=0):
         return np.average(images, axis=3).reshape(image_shape[0], image_shape[1] * image_shape[2])
     else:
         return np.average(images, axis=3).reshape(image_shape[0], image_shape[1], image_shape[2], 1)
-    
+
 def normalize(images, flatten=0):
     """
     images: matrix of grayscale
@@ -130,7 +127,7 @@ def normalize(images, flatten=0):
     #return min_max_scaler.fit_transform(subtracted_mean)
 ```
 
-### Question 1 
+### Question 1
 
 _Describe the techniques used to preprocess the data._
 
@@ -224,7 +221,7 @@ def get_bias(shape, constant=1):
         return tf.Variable(tf.zeros(shape))
     else:
         return tf.constant(0.1, shape=shape)
-    
+
 def get_conv2d(x, W, stride):
     return tf.nn.conv2d(x, W, [1, stride, stride, 1], padding='SAME')
 
@@ -295,7 +292,7 @@ def inference(images, keep_prob):
         fc2 = tf.nn.relu(fc2)
 
     fc2 = tf.nn.dropout(fc2, keep_prob=keep_prob, seed=66478)
-        
+
     # fc3 layer : 1 x 1 x 256
     with tf.name_scope('fc3'):
         W_fc3 = get_weight([256, n_classes])
@@ -309,7 +306,7 @@ def inference(images, keep_prob):
     regularizers = (tf.nn.l2_loss(W_fc1) + tf.nn.l2_loss(b_fc1) +
                     tf.nn.l2_loss(W_fc2) + tf.nn.l2_loss(b_fc2) +
                     tf.nn.l2_loss(W_fc3) + tf.nn.l2_loss(b_fc3))
-        
+
     return fc3, regularizers
 
 x = tf.placeholder(tf.float32, [None, image_shape[0], image_shape[1], image_shape[2]])
@@ -387,7 +384,7 @@ with tf.Session() as sess:
             batch_labels = train_labels[batch_start:batch_start + batch_size]
 
             _, l = sess.run(
-                [optimizer, loss], 
+                [optimizer, loss],
                 feed_dict={x: batch_features, y: batch_labels, keep_prob: 0.8})
 
             if i % log_batch_step == 0:
@@ -406,7 +403,7 @@ with tf.Session() as sess:
         summary_str = sess.run(summary, feed_dict=valid_feed_dict)
         summary_writer.add_summary(summary_str, epoch)
         summary_writer.flush()
-        
+
         checkpoint_file = os.path.join(log_dir, 'checkpoint')
         saver.save(sess, checkpoint_file, global_step=epoch)
 
@@ -576,7 +573,7 @@ with tf.Session() as sess:
          35             _, l = sess.run(
          36                 [optimizer, loss],
     ---> 37                 feed_dict={x: batch_features, y: batch_labels, keep_prob: 0.8})
-         38 
+         38
          39             if i % log_batch_step == 0:
 
 
@@ -616,11 +613,11 @@ with tf.Session() as sess:
         952         return tf_session.TF_Run(session, options,
         953                                  feed_dict, fetch_list, target_list,
     --> 954                                  status, run_metadata)
-        955 
+        955
         956     def _prun_fn(session, handle, feed_dict, fetch_list):
 
 
-    KeyboardInterrupt: 
+    KeyboardInterrupt:
 
 
 ### Question 3
@@ -724,7 +721,7 @@ for i in range(1, 6):
     a = fig.add_subplot(1,5,i)
     a.set_title(str(new_labels[i-1]))
     plt.imshow(new_images[i-1])
-    
+
 new_labels = encoder.transform(new_labels)
 new_labels = new_labels.astype(np.float32)
 ```
