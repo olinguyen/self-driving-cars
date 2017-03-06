@@ -1,4 +1,6 @@
+**Vehicle Detection Project**
 
+The goal of this project is to detect and track vehicles in a video stream and identify them with a bounding box. This is accomplished using Histogram of Oriented Gradients (HOG) and a LinearSVM to create an object detector. A sliding window technique was then used to search for cars and pass them to the trained classifier to identify vehicles in the video frame.
 
 ```python
 from features import *
@@ -21,20 +23,8 @@ from sklearn.model_selection import train_test_split
 %autoreload 2
 ```
 
-**Vehicle Detection Project**
-
-The goals / steps of this project are the following:
-
-* Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images and train a classifier Linear SVM classifier
-* Optionally, you can also apply a color transform and append binned color features, as well as histograms of color, to your HOG feature vector. 
-* Note: for those first two steps don't forget to normalize your features and randomize a selection for training and testing.
-* Implement a sliding-window technique and use your trained classifier to search for vehicles in images.
-* Run your pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
-* Estimate a bounding box for vehicles detected.
 
 # Histogram of Oriented Gradients (HOG)
-
-### 1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
 All the code for the feature extraction part of the car detection can be down in `features.py`.
 
@@ -118,26 +108,22 @@ axarr[1][3].set_title("Non car color histogram")
 ![png](output_4_2.png)
 
 
-### 2. Explain how you settled on your final choice of HOG parameters.
-
 After experimenting with various combination of values, the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`.
 
 Not only did the output yield good results in the classification of cars, but it has a good number of elements in the feature vector, i.e. 2580 features. Having a higher dimensionality makes the training of the classifier much more slower.
-
-### 3. Preparing the data
 
 For training the model, the GTI dataset which contains various images of cars and non-cars examples with ground truth labels. The data is written to a csv file and then loaded to pandas for easily manipulation of the files.
 
 
 ```python
 def write_csv(data_folder, dst_folder):
-    
+
     train_files = list(glob.glob(data_folder + '/*/*.png'))
     labels = [path.split('/')[1] for path in train_files]
     imgtype = [path.split('/')[2] for path in train_files]
-    
+
     image_names = [path.split('/')[-1] for path in train_files]
-    
+
     # save csv
     dst_file = data_folder.split('/')[-1] + ".csv"
     csv_file = dst_folder + "/" + dst_file
@@ -146,7 +132,7 @@ def write_csv(data_folder, dst_folder):
         writer.writerow(['image_path', 'image_name', 'label', 'image_type'])
         for index, feature in enumerate(train_files):
             writer.writerow([train_files[index], image_names[index], labels[index], imgtype[index]])
-            
+
     print("Saved:", csv_file)
 ```
 
@@ -254,8 +240,8 @@ for i, img_type in enumerate(types):
     img = mpimg.imread(imgpath.values[0])
     plt.imshow(img)
     plt.title("{}".format(img_type), fontsize=10)
-    plt.axis('off') 
-    
+    plt.axis('off')
+
 for i in range(5, 10):
     plt.subplot(num_classes, img_per_row, i + 1)
     imgpath = data.loc[(data['label'] == 'non-vehicles')].sample(1)['image_path']
@@ -287,18 +273,18 @@ spatial_feat = True # Spatial features on or off
 hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
 
-car_features = extract_features(vehicles['image_path'], color_space=color_space, 
-                        spatial_size=spatial_size, hist_bins=hist_bins, 
-                        orient=orient, pix_per_cell=pix_per_cell, 
-                        cell_per_block=cell_per_block, 
-                        hog_channel=hog_channel, spatial_feat=spatial_feat, 
+car_features = extract_features(vehicles['image_path'], color_space=color_space,
+                        spatial_size=spatial_size, hist_bins=hist_bins,
+                        orient=orient, pix_per_cell=pix_per_cell,
+                        cell_per_block=cell_per_block,
+                        hog_channel=hog_channel, spatial_feat=spatial_feat,
                         hist_feat=hist_feat, hog_feat=hog_feat)
-                        
-notcar_features = extract_features(nonvehicles['image_path'], color_space=color_space, 
-                        spatial_size=spatial_size, hist_bins=hist_bins, 
-                        orient=orient, pix_per_cell=pix_per_cell, 
-                        cell_per_block=cell_per_block, 
-                        hog_channel=hog_channel, spatial_feat=spatial_feat, 
+
+notcar_features = extract_features(nonvehicles['image_path'], color_space=color_space,
+                        spatial_size=spatial_size, hist_bins=hist_bins,
+                        orient=orient, pix_per_cell=pix_per_cell,
+                        cell_per_block=cell_per_block,
+                        hog_channel=hog_channel, spatial_feat=spatial_feat,
                         hist_feat=hist_feat, hog_feat=hog_feat)
 
 #labels = np.array(data['label'])
@@ -350,7 +336,7 @@ _ = plt.plot(pca.explained_variance_ratio_)
 
 
 ```python
-X_train, X_test, y_train, y_test = train_test_split(pca_features, labels, test_size=0.20, random_state=42) 
+X_train, X_test, y_train, y_test = train_test_split(pca_features, labels, test_size=0.20, random_state=42)
 
 print("Training data:", X_train.shape)
 print("Testing data:", X_test.shape)
@@ -369,7 +355,7 @@ data_dict['spatial_feat'] = spatial_feat
 data_dict['hist_feat'] = hist_feat
 data_dict['hog_feat'] = hog_feat
 data_dict['orient'] = orient
-data_dict['color_space'] = color_space 
+data_dict['color_space'] = color_space
 data_dict['pix_per_cell'] = pix_per_cell
 data_dict['cell_per_block'] = cell_per_block
 data_dict['hog_channel'] = hog_channel
@@ -412,7 +398,7 @@ print(clf_svc)
 from sklearn.externals import joblib
 
 fn = './vehicle_vs_non_vehicle_model_svcrbf_pca.pkl'
-joblib.dump(clf_svc, fn) 
+joblib.dump(clf_svc, fn)
 
 print('model saved')
 ```
@@ -474,21 +460,21 @@ search_dict = {
 
 for item, param in search_dict.items():
     for window_size, y_start_stop, x_start_stop in zip(param[0], param[1], param[2]):
-        windows_to_search = slide_window(img, x_start_stop=x_start_stop, y_start_stop=y_start_stop, 
+        windows_to_search = slide_window(img, x_start_stop=x_start_stop, y_start_stop=y_start_stop,
                             xy_window=window_size, xy_overlap=xy_overlap)
 
     windows += windows_to_search
 
-#windows = slide_window(img, x_start_stop=x_start_stop, y_start_stop=y_start_stop, 
+#windows = slide_window(img, x_start_stop=x_start_stop, y_start_stop=y_start_stop,
 #                       xy_window=window_size, xy_overlap=xy_overlap)
 
 X_scaler = StandardScaler().fit(features)
 
-hot_windows = search_windows(img, windows, clf_svc, X_scaler, color_space=color_space, 
-                        spatial_size=spatial_size, hist_bins=hist_bins, 
-                        orient=orient, pix_per_cell=pix_per_cell, 
-                        cell_per_block=cell_per_block, 
-                        hog_channel=hog_channel, spatial_feat=spatial_feat, 
+hot_windows = search_windows(img, windows, clf_svc, X_scaler, color_space=color_space,
+                        spatial_size=spatial_size, hist_bins=hist_bins,
+                        orient=orient, pix_per_cell=pix_per_cell,
+                        cell_per_block=cell_per_block,
+                        hog_channel=hog_channel, spatial_feat=spatial_feat,
                         hist_feat=hist_feat, hog_feat=hog_feat, pca_feat=True, pca=pca)                       
 
 draw_image = img.copy()
@@ -518,7 +504,7 @@ To remove multiple detections, a heat map is used to represent regions that were
 heat = np.zeros_like(img[:,:,0]).astype(np.float)
 # Add heat to each box in box list
 heat = add_heat(heat, hot_windows)
-    
+
 # Apply threshold to help remove false positives
 heat = apply_threshold(heat, 1)
 
@@ -567,7 +553,7 @@ hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
 heat_thresh = 1
 
-car_detector = CarDetector(clf_svc, pca, X_scaler, color_space=color_space, orient=orient, 
+car_detector = CarDetector(clf_svc, pca, X_scaler, color_space=color_space, orient=orient,
                            pix_per_cell=pix_per_cell, cell_per_block=cell_per_block, hog_channel=hog_channel,
                           spatial_size=spatial_size, hist_bins=hist_bins, spatial_feat=spatial_feat,
                           hist_feat=hist_feat, hog_feat=hog_feat, heat_thresh=heat_thresh)
@@ -580,7 +566,7 @@ for fname in images:
     #print(fname)
     output_image = car_detector.pipeline(img)
     mpimg.imsave('output_images/output_{}'.format(fname.split("/")[2]), output_image)
-    
+
 f, axarr = plt.subplots(2, 3, figsize=(24, 9))
 f.tight_layout()
 
@@ -620,8 +606,8 @@ outclip = clip.fl_image(car_detector.pipeline)
 
 
     [MoviePy] Done.
-    [MoviePy] >>>> Video ready: project_output.mp4 
-    
+    [MoviePy] >>>> Video ready: project_output.mp4
+
     CPU times: user 7min 35s, sys: 2.88 s, total: 7min 38s
     Wall time: 7min 48s
 
